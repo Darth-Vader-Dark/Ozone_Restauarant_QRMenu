@@ -85,61 +85,81 @@ export default function AdminDashboardPage() {
           </TabsList>
 
           <TabsContent value="menu" className="space-y-6">
-            {categories.map((category) => (
-              <Card key={category.id}>
-                <CardHeader>
-                  <CardTitle>{category.name}</CardTitle>
-                  <CardDescription>
-                    {category.items.length} item{category.items.length !== 1 ? "s" : ""}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {category.items.map((item) => (
-                    <MenuItemEditor
-                      key={item.id}
-                      item={item}
-                      categoryId={category.id}
-                      onUpdate={(updatedItem) => {
-                        const updatedCategory = {
-                          ...category,
-                          items: category.items.map((i) => (i.id === item.id ? updatedItem : i)),
-                        }
-                        updateCategory(updatedCategory)
-                      }}
-                      onDelete={() => {
-                        const updatedCategory = {
-                          ...category,
-                          items: category.items.filter((i) => i.id !== item.id),
-                        }
-                        updateCategory(updatedCategory)
-                      }}
-                    />
-                  ))}
+            {categories.length === 0 ? (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <h3 className="text-lg font-semibold mb-2">No Menu Categories Yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Start by creating your first menu category using the "Categories" tab above.
+                  </p>
                   <Button
-                    variant="outline"
-                    className="w-full bg-transparent"
                     onClick={() => {
-                      const newItem = {
-                        id: `item-${Date.now()}`,
-                        name: "New Item",
-                        description: "Description",
-                        descriptionRw: "Ibisobanuro",
-                        price: 0,
-                        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
-                      }
-                      const updatedCategory = {
-                        ...category,
-                        items: [...category.items, newItem],
-                      }
-                      updateCategory(updatedCategory)
+                      const tabsList = document.querySelector('[role="tablist"]') as HTMLElement;
+                      const categoriesTab = tabsList?.querySelector('[value="categories"]') as HTMLElement;
+                      categoriesTab?.click();
                     }}
                   >
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Item to {category.name}
+                    Go to Categories
                   </Button>
                 </CardContent>
               </Card>
-            ))}
+            ) : (
+              categories.map((category) => (
+                <Card key={category.id}>
+                  <CardHeader>
+                    <CardTitle>{category.name}</CardTitle>
+                    <CardDescription>
+                      {category.items.length} item{category.items.length !== 1 ? "s" : ""}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {category.items.map((item) => (
+                      <MenuItemEditor
+                        key={item.id}
+                        item={item}
+                        categoryId={category.id}
+                        onUpdate={(updatedItem) => {
+                          const updatedCategory = {
+                            ...category,
+                            items: category.items.map((i) => (i.id === item.id ? updatedItem : i)),
+                          }
+                          updateCategory(updatedCategory)
+                        }}
+                        onDelete={() => {
+                          const updatedCategory = {
+                            ...category,
+                            items: category.items.filter((i) => i.id !== item.id),
+                          }
+                          updateCategory(updatedCategory)
+                        }}
+                      />
+                    ))}
+                    <Button
+                      variant="outline"
+                      className="w-full bg-transparent"
+                      onClick={() => {
+                        const newItem = {
+                          id: `item-${Date.now()}`,
+                          name: "New Item",
+                          description: "Description",
+                          descriptionRw: "Ibisobanuro",
+                          price: 0,
+                          image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=80",
+                        }
+                        const updatedCategory = {
+                          ...category,
+                          items: [...category.items, newItem],
+                        }
+                        updateCategory(updatedCategory)
+                      }}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Add Item to {category.name}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </TabsContent>
 
           <TabsContent value="categories" className="space-y-6">

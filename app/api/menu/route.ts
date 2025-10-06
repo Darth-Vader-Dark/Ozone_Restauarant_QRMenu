@@ -22,15 +22,12 @@ export async function GET(request: NextRequest) {
       await connectToDatabase();
       categories = await MenuCategory.find({}).sort({ createdAt: 1 });
 
-      // If no categories exist in database, initialize with default data
-      if (categories.length === 0) {
-        await MenuCategory.insertMany(menuData);
-        categories = await MenuCategory.find({}).sort({ createdAt: 1 });
-      }
+      // If no categories exist in database, return empty array (no auto-initialization)
+      // Admin will need to add all content through the admin dashboard
     } catch (dbError) {
-      console.warn('Database connection failed, using default data:', dbError);
-      // Fallback to default data if database is not available
-      categories = menuData;
+      console.warn('Database connection failed, returning empty menu:', dbError);
+      // Return empty array if database is not available
+      categories = [];
     }
 
     // Set cache control headers to prevent caching of dynamic content
@@ -43,8 +40,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(categories, { headers });
   } catch (error) {
     console.error('Error fetching menu:', error);
-    // Fallback to default data on any error
-    return NextResponse.json(menuData, {
+    // Return empty array on any error
+    return NextResponse.json([], {
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
       }

@@ -22,12 +22,12 @@ export function useMenuData() {
       }
 
       const data = await response.json()
-      setCategories(data)
+      setCategories(data || []) // Ensure we always have an array
     } catch (err) {
       console.error('Error fetching menu data:', err)
       setError(err instanceof Error ? err.message : 'Failed to fetch menu data')
-      // Fallback to default data if API fails
-      setCategories(defaultMenuData)
+      // Don't fallback to default data - keep empty array
+      setCategories([])
     } finally {
       setLoading(false)
     }

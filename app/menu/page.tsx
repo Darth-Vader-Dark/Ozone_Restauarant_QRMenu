@@ -7,7 +7,35 @@ import { LanguageToggle } from "@/components/language-toggle"
 import { useMenuData } from "@/hooks/use-menu-data"
 
 export default function MenuPage() {
-  const { categories } = useMenuData()
+  const { categories, loading, error } = useMenuData()
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading menu...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">Menu Unavailable</h2>
+          <p className="text-muted-foreground mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -26,11 +54,32 @@ export default function MenuPage() {
           </p>
         </div>
 
-        <div className="space-y-16">
-          {categories.map((category) => (
-            <MenuSection key={category.id} category={category} />
-          ))}
-        </div>
+        {categories.length === 0 ? (
+          <div className="text-center py-16">
+            <h2 className="text-2xl font-semibold mb-4">Menu Coming Soon</h2>
+            <p className="text-muted-foreground mb-6">
+              We're preparing an amazing selection of traditional East African dishes for you.
+              Please check back soon!
+            </p>
+            <div className="max-w-md mx-auto">
+              <p className="text-sm text-muted-foreground">
+                📍 Visit us at: Opposite INES-Ruhengeri, Musanze, Rwanda
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                📞 Phone: +250 725 181 325
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                ✉️ Email: ozonerestaurant@gmail.com
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-16">
+            {categories.map((category) => (
+              <MenuSection key={category.id} category={category} />
+            ))}
+          </div>
+        )}
       </main>
 
       <footer className="bg-card border-t border-border mt-16">
