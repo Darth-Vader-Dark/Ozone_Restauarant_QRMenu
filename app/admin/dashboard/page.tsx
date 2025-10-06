@@ -14,7 +14,7 @@ import type { MenuCategory } from "@/lib/menu-data"
 export default function AdminDashboardPage() {
   const router = useRouter()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const { categories, loading, error, updateCategory, addCategory, deleteCategory, resetToDefault } = useMenuData()
+  const { categories, loading, error, updateCategory, addCategory, deleteCategory } = useMenuData()
 
   useEffect(() => {
     const auth = sessionStorage.getItem("admin_authenticated")
@@ -70,9 +70,6 @@ export default function AdminDashboardPage() {
           <Button variant="outline" onClick={handleLogout}>
             <LogOut className="mr-2 h-4 w-4" />
             Logout
-          </Button>
-          <Button variant="secondary" onClick={resetToDefault}>
-            Reset to Default
           </Button>
         </div>
       </header>

@@ -4,18 +4,15 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Home } from "lucide-react"
-
-const categories = [
-  { id: "rwandan", label: "Rwandan 🇷🇼", labelRw: "Ibiryo bya Rwanda 🇷🇼" },
-  { id: "sudanese", label: "Sudanese 🇸🇩", labelRw: "Ibiryo bya Sudani 🇸🇩" },
-  { id: "south-sudanese", label: "South Sudanese 🇸🇸", labelRw: "Ibiryo bya Sudani y'Amajyepfo 🇸🇸" },
-  { id: "drinks", label: "Drinks 🍹", labelRw: "Ibinyobwa 🍹" },
-]
+import { useMenuData } from "@/hooks/use-menu-data"
 
 export function MenuNav() {
   const [activeSection, setActiveSection] = useState("")
+  const { categories, loading } = useMenuData()
 
   useEffect(() => {
+    if (categories.length === 0) return
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -33,7 +30,7 @@ export function MenuNav() {
     })
 
     return () => observer.disconnect()
-  }, [])
+  }, [categories])
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id)
@@ -49,6 +46,18 @@ export function MenuNav() {
     }
   }
 
+  if (loading || categories.length === 0) {
+    return (
+      <nav className="sticky top-0 z-40 bg-card/95 backdrop-blur-sm border-b border-border">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-center h-16">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+          </div>
+        </div>
+      </nav>
+    )
+  }
+
   return (
     <nav className="sticky top-0 z-40 bg-card/95 backdrop-blur-sm border-b border-border">
       <div className="container mx-auto px-4">
@@ -60,7 +69,7 @@ export function MenuNav() {
           </Button>
 
           <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-            {categories.map(({ id, label }) => (
+            {categories.map(({ id, name }) => (
               <Button
                 key={id}
                 variant={activeSection === id ? "default" : "ghost"}
@@ -68,7 +77,7 @@ export function MenuNav() {
                 onClick={() => scrollToSection(id)}
                 className="whitespace-nowrap text-xs sm:text-sm"
               >
-                {label}
+                {name}
               </Button>
             ))}
           </div>
