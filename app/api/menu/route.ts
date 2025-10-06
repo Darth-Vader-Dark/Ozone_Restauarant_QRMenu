@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: 'Failed to create category',
-        details: process.env.NODE_ENV === 'development' ? error.message : 'Please try again later'
+        details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : 'Please try again later'
       },
       { status: 500 }
     );
