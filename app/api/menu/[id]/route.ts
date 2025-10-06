@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/mongodb';
 import MenuCategory from '@/lib/models/menu';
 
+// Force this route to be treated as dynamic
+export const dynamic = 'force-dynamic';
+
 // PUT /api/menu/[id] - Update a specific menu category
 export async function PUT(
   request: NextRequest,
@@ -10,6 +13,11 @@ export async function PUT(
   try {
     const params = await context.params;
     const categoryId = params.id;
+
+    // Skip database operations during build time
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      return NextResponse.json({ message: 'Build time - no operations' });
+    }
 
     await connectToDatabase();
 
@@ -51,6 +59,11 @@ export async function DELETE(
   try {
     const params = await context.params;
     const categoryId = params.id;
+
+    // Skip database operations during build time
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      return NextResponse.json({ message: 'Build time - no operations' });
+    }
 
     await connectToDatabase();
 

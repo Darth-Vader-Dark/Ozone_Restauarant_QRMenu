@@ -30,6 +30,12 @@ async function connectToDatabase(): Promise<typeof mongoose> {
     return mongoose;
   }
 
+  // Additional check for build-time scenarios
+  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.BUILDING === 'true') {
+    console.warn('MongoDB connection skipped during build phase');
+    return mongoose;
+  }
+
   if (cached!.conn) {
     return cached!.conn;
   }
