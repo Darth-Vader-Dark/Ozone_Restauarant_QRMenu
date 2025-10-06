@@ -1,12 +1,5 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI!;
-const DATABASE_NAME = process.env.DATABASE_NAME || 'restaurant_menu';
-
-if (!MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
-}
-
 interface MongooseCache {
   conn: typeof mongoose | null;
   promise: Promise<typeof mongoose> | null;
@@ -24,9 +17,17 @@ if (!cached) {
 }
 
 async function connectToDatabase(): Promise<typeof mongoose> {
+  // Get environment variables at runtime, not module load time
+  const MONGODB_URI = process.env.MONGODB_URI;
+  const DATABASE_NAME = process.env.DATABASE_NAME || 'restaurant_menu';
+
+  if (!MONGODB_URI) {
+    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+  }
+
   // During build time or when MongoDB URI is not available, skip connection
-  if (!MONGODB_URI || process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
-    console.warn('MongoDB connection skipped during build or missing URI');
+  if (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
+    console.warn('MongoDB connection skipped during production build or missing URI');
     return mongoose;
   }
 
