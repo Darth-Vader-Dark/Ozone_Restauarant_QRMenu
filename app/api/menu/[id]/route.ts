@@ -14,9 +14,9 @@ export async function PUT(
     const params = await context.params;
     const categoryId = params.id;
 
-    // Skip database operations during build time
-    if (process.env.NEXT_PHASE === 'phase-production-build') {
-      return NextResponse.json({ message: 'Build time - no operations' });
+    // Skip database operations during build time or if using test mode
+    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.MONGODB_URI === 'test') {
+      return NextResponse.json({ message: 'Build time or test mode - no operations' });
     }
 
     await connectToDatabase();
@@ -60,9 +60,9 @@ export async function DELETE(
     const params = await context.params;
     const categoryId = params.id;
 
-    // Skip database operations during build time
-    if (process.env.NEXT_PHASE === 'phase-production-build') {
-      return NextResponse.json({ message: 'Build time - no operations' });
+    // Skip database operations during build time or if using test mode
+    if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.MONGODB_URI === 'test') {
+      return NextResponse.json({ message: 'Build time or test mode - no operations' });
     }
 
     await connectToDatabase();

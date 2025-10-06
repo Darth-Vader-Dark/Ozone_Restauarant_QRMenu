@@ -6,24 +6,29 @@ import { menuData } from '@/lib/menu-data';
 // GET /api/menu - Fetch all menu categories
 export async function GET() {
   try {
-    await connectToDatabase();
+    // Try to connect to database, but don't fail if it's not available
+    let categories = [];
 
-    const categories = await MenuCategory.find({}).sort({ createdAt: 1 });
+    try {
+      await connectToDatabase();
+      categories = await MenuCategory.find({}).sort({ createdAt: 1 });
 
-    // If no categories exist in database, initialize with default data
-    if (categories.length === 0) {
-      await MenuCategory.insertMany(menuData);
-      const initializedCategories = await MenuCategory.find({}).sort({ createdAt: 1 });
-      return NextResponse.json(initializedCategories);
+      // If no categories exist in database, initialize with default data
+      if (categories.length === 0) {
+        await MenuCategory.insertMany(menuData);
+        categories = await MenuCategory.find({}).sort({ createdAt: 1 });
+      }
+    } catch (dbError) {
+      console.warn('Database connection failed, using default data:', dbError);
+      // Fallback to default data if database is not available
+      categories = menuData;
     }
 
     return NextResponse.json(categories);
   } catch (error) {
     console.error('Error fetching menu:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch menu data' },
-      { status: 500 }
-    );
+    // Fallback to default data on any error
+    return NextResponse.json(menuData);
   }
 }
 

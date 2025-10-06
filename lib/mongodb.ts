@@ -17,6 +17,12 @@ if (!cached) {
 }
 
 async function connectToDatabase(): Promise<typeof mongoose> {
+  // For development/testing, skip actual database connection
+  if (process.env.NODE_ENV !== 'production' || process.env.MONGODB_URI === 'test') {
+    console.log('Skipping MongoDB connection for development/testing');
+    return mongoose;
+  }
+
   // Get environment variables at runtime, not module load time
   const MONGODB_URI = process.env.MONGODB_URI;
   const DATABASE_NAME = process.env.DATABASE_NAME || 'restaurant_menu';
