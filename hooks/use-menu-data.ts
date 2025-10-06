@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { menuData as defaultMenuData, type MenuCategory } from "@/lib/menu-data"
+import type { MenuCategory } from "@/lib/menu-data"
 
 export function useMenuData() {
   const [categories, setCategories] = useState<MenuCategory[]>([])
@@ -137,19 +137,15 @@ export function useMenuData() {
         await deleteCategory(category.id)
       }
 
-      // Reinitialize with default data
-      for (const category of defaultMenuData) {
-        await addCategory(category)
-      }
-
+      // Since there's no default data, just refresh to show empty state
       await fetchCategories()
     } catch (err) {
-      console.error('Error resetting to default:', err)
-      setError(err instanceof Error ? err.message : 'Failed to reset to default')
+      console.error('Error resetting menu:', err)
+      setError(err instanceof Error ? err.message : 'Failed to reset menu')
     } finally {
       setLoading(false)
     }
-  }, [categories, deleteCategory, addCategory, fetchCategories])
+  }, [categories, deleteCategory, fetchCategories])
 
   return {
     categories,
