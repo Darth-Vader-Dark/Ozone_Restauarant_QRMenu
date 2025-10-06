@@ -5,14 +5,16 @@ import MenuCategory from '@/lib/models/menu';
 // PUT /api/menu/[id] - Update a specific menu category
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
+    const categoryId = params.id;
+
     await connectToDatabase();
 
     const body = await request.json();
     const { name, nameRw, items } = body;
-    const { id: categoryId } = await params;
 
     const updatedCategory = await MenuCategory.findOneAndUpdate(
       { id: categoryId },
@@ -44,12 +46,14 @@ export async function PUT(
 // DELETE /api/menu/[id] - Delete a specific menu category
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
+    const categoryId = params.id;
+
     await connectToDatabase();
 
-    const { id: categoryId } = await params;
     const deletedCategory = await MenuCategory.findOneAndDelete({ id: categoryId });
 
     if (!deletedCategory) {

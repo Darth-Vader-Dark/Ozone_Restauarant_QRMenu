@@ -24,6 +24,12 @@ if (!cached) {
 }
 
 async function connectToDatabase(): Promise<typeof mongoose> {
+  // During build time or when MongoDB URI is not available, skip connection
+  if (!MONGODB_URI || process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
+    console.warn('MongoDB connection skipped during build or missing URI');
+    return mongoose;
+  }
+
   if (cached!.conn) {
     return cached!.conn;
   }
