@@ -4,8 +4,12 @@ import MenuCategory from '@/lib/models/menu';
 import { menuData } from '@/lib/menu-data';
 
 // GET /api/menu - Fetch all menu categories
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Check if this is a refresh request (to bypass any caching)
+    const url = new URL(request.url);
+    const isRefresh = url.searchParams.get('refresh');
+
     // Try to connect to database, but don't fail if it's not available
     let categories = [];
 
@@ -24,11 +28,22 @@ export async function GET() {
       categories = menuData;
     }
 
-    return NextResponse.json(categories);
+    // Set cache control headers to prevent caching of dynamic content
+    const headers = {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
+    };
+
+    return NextResponse.json(categories, { headers });
   } catch (error) {
     console.error('Error fetching menu:', error);
     // Fallback to default data on any error
-    return NextResponse.json(menuData);
+    return NextResponse.json(menuData, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+      }
+    });
   }
 }
 

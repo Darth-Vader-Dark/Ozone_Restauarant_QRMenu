@@ -7,6 +7,7 @@ export function useMenuData() {
   const [categories, setCategories] = useState<MenuCategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   // Fetch menu data from API
   const fetchCategories = useCallback(async () => {
@@ -14,7 +15,7 @@ export function useMenuData() {
       setLoading(true)
       setError(null)
 
-      const response = await fetch('/api/menu')
+      const response = await fetch(`/api/menu?refresh=${refreshTrigger}`)
 
       if (!response.ok) {
         throw new Error('Failed to fetch menu data')
@@ -30,12 +31,17 @@ export function useMenuData() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [refreshTrigger])
 
   // Initialize data on mount
   useEffect(() => {
     fetchCategories()
   }, [fetchCategories])
+
+  // Manual refresh function
+  const refreshData = useCallback(() => {
+    setRefreshTrigger(prev => prev + 1)
+  }, [])
 
   // Update category via API
   const updateCategory = useCallback(async (updatedCategory: MenuCategory) => {
@@ -60,12 +66,15 @@ export function useMenuData() {
       setCategories((prev) =>
         prev.map((cat) => (cat.id === updatedCategory.id ? updatedData : cat))
       )
+
+      // Trigger refresh for public pages
+      refreshData()
     } catch (err) {
       console.error('Error updating category:', err)
       setError(err instanceof Error ? err.message : 'Failed to update category')
       throw err
     }
-  }, [])
+  }, [refreshData])
 
   // Add new category via API
   const addCategory = useCallback(async (newCategory: MenuCategory) => {
@@ -85,12 +94,15 @@ export function useMenuData() {
 
       const createdCategory = await response.json()
       setCategories((prev) => [...prev, createdCategory])
+
+      // Trigger refresh for public pages
+      refreshData()
     } catch (err) {
       console.error('Error creating category:', err)
       setError(err instanceof Error ? err.message : 'Failed to create category')
       throw err
     }
-  }, [])
+  }, [refreshData])
 
   // Delete category via API
   const deleteCategory = useCallback(async (categoryId: string) => {
@@ -104,12 +116,15 @@ export function useMenuData() {
       }
 
       setCategories((prev) => prev.filter((cat) => cat.id !== categoryId))
+
+      // Trigger refresh for public pages
+      refreshData()
     } catch (err) {
       console.error('Error deleting category:', err)
       setError(err instanceof Error ? err.message : 'Failed to delete category')
       throw err
     }
-  }, [])
+  }, [refreshData])
 
   // Reset to default data
   const resetToDefault = useCallback(async () => {
@@ -145,5 +160,6 @@ export function useMenuData() {
     deleteCategory,
     resetToDefault,
     refetch: fetchCategories,
+    refreshData,
   }
 }
