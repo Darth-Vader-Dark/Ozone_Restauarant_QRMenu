@@ -10,6 +10,11 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const isRefresh = url.searchParams.get('refresh');
 
+    // Only skip during actual build time, not development
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      return NextResponse.json({ message: 'Build time - no operations' });
+    }
+
     // Try to connect to database, but don't fail if it's not available
     let categories = [];
 
@@ -50,6 +55,11 @@ export async function GET(request: NextRequest) {
 // POST /api/menu - Create a new menu category
 export async function POST(request: NextRequest) {
   try {
+    // Only skip during actual build time, not development
+    if (process.env.NEXT_PHASE === 'phase-production-build') {
+      return NextResponse.json({ message: 'Build time - no operations' });
+    }
+
     await connectToDatabase();
 
     const body = await request.json();
