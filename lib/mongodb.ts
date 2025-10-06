@@ -17,12 +17,6 @@ if (!cached) {
 }
 
 async function connectToDatabase(): Promise<typeof mongoose> {
-  // For development/testing, skip actual database connection
-  if (process.env.NODE_ENV !== 'production' || process.env.MONGODB_URI === 'test') {
-    console.log('Skipping MongoDB connection for development/testing');
-    return mongoose;
-  }
-
   // Get environment variables at runtime, not module load time
   const MONGODB_URI = process.env.MONGODB_URI;
   const DATABASE_NAME = process.env.DATABASE_NAME || 'restaurant_menu';
@@ -31,14 +25,8 @@ async function connectToDatabase(): Promise<typeof mongoose> {
     throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
   }
 
-  // During build time or when MongoDB URI is not available, skip connection
-  if (process.env.NODE_ENV === 'production' && !process.env.MONGODB_URI) {
-    console.warn('MongoDB connection skipped during production build or missing URI');
-    return mongoose;
-  }
-
-  // Additional check for build-time scenarios
-  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.BUILDING === 'true') {
+  // Only skip during actual build time, not development
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
     console.warn('MongoDB connection skipped during build phase');
     return mongoose;
   }

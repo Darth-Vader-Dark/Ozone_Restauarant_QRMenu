@@ -44,8 +44,23 @@ export async function PUT(
     return NextResponse.json(updatedCategory);
   } catch (error) {
     console.error('Error updating category:', error);
+
+    // Provide helpful error message for database connection issues
+    if (error.message?.includes('MONGODB_URI')) {
+      return NextResponse.json(
+        {
+          error: 'Database configuration error',
+          details: 'Please check your MongoDB Atlas connection string in .env.local'
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to update category' },
+      {
+        error: 'Failed to update category',
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Please try again later'
+      },
       { status: 500 }
     );
   }
@@ -79,8 +94,23 @@ export async function DELETE(
     return NextResponse.json({ message: 'Category deleted successfully' });
   } catch (error) {
     console.error('Error deleting category:', error);
+
+    // Provide helpful error message for database connection issues
+    if (error instanceof Error && error.message?.includes('MONGODB_URI')) {
+      return NextResponse.json(
+        {
+          error: 'Database configuration error',
+          details: 'Please check your MongoDB Atlas connection string in .env.local'
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to delete category' },
+      {
+        error: 'Failed to delete category',
+        details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : 'Please try again later'
+      },
       { status: 500 }
     );
   }

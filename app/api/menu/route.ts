@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ message: 'Build time - no operations' });
     }
 
-    // Try to connect to database, but don't fail if it's not available
+    // Try to connect to database, but handle failures gracefully
     let categories = [];
 
     try {
@@ -25,9 +25,14 @@ export async function GET(request: NextRequest) {
       // If no categories exist in database, return empty array (no auto-initialization)
       // Admin will need to add all content through the admin dashboard
     } catch (dbError) {
-      console.warn('Database connection failed, returning empty menu:', dbError);
-      // Return empty array if database is not available
-      categories = [];
+      console.error('Database connection failed:', dbError);
+      return NextResponse.json(
+        {
+          error: 'Database connection failed. Please check your MongoDB Atlas connection string in .env.local',
+          details: process.env.NODE_ENV === 'development' && dbError instanceof Error ? dbError.message : 'Contact administrator'
+        },
+        { status: 500 }
+      );
     }
 
     // Set cache control headers to prevent caching of dynamic content
@@ -40,12 +45,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(categories, { headers });
   } catch (error) {
     console.error('Error fetching menu:', error);
-    // Return empty array on any error
-    return NextResponse.json([], {
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-      }
-    });
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch menu data',
+        details: process.env.NODE_ENV === 'development' && error instanceof Error ? error.message : 'Please try again later'
+      },
+      { status: 500 }
+    );
   }
 }
 
@@ -82,8 +88,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(savedCategory, { status: 201 });
   } catch (error) {
     console.error('Error creating category:', error);
+
+    // Provide helpful error message for database connection issues
+    if (error instanceof Error && error.message?.includes('MONGODB_URI')) {
+      return NextResponse.json(
+        {
+          error: 'Database configuration error',
+          details: 'Please check your MongoDB Atlas connection string in .env.local'
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: 'Failed to create category' },
+      {
+        error: 'Failed to create category',
+        details: process.env.NODE_ENV === 'development' ? error.message : 'Please try again later'
+      },
       { status: 500 }
     );
   }
